@@ -30,6 +30,10 @@ class ViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDe
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.mapView = MKMapView(frame: self.view.bounds)
+        self.mapView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+        self.view.addSubview(self.mapView)
+  
         self.mapView.delegate = self
         self.mapView.register(MKPinAnnotationView.self, forAnnotationViewWithReuseIdentifier: "pin")
         
@@ -50,7 +54,7 @@ class ViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDe
         request.httpMethod = "GET"
         URLSession.shared.dataTask(with: request) { (data, response, error) in
             guard let data = data else {
-                debugPrint(error ?? "no data")
+                debugPrint(error?.localizedDescription ?? "no data")
                 return
             }
             self.users = try! JSONDecoder().decode([User].self, from: data)
