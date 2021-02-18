@@ -25,7 +25,7 @@ class User : NSObject, Codable,  MKAnnotation {
 }
 class ViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
 
-    @IBOutlet var mapView: MKMapView!
+    var mapView: MKMapView!
     var users: [User] = []
     
     override func viewDidLoad() {
