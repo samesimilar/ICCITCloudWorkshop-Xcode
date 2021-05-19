@@ -23,11 +23,29 @@ class User : NSObject, Codable,  MKAnnotation {
     
 
 }
+
+class Meal : NSObject, Codable, MKAnnotation {
+    var coordinate: CLLocationCoordinate2D {
+        return CLLocationCoordinate2D(latitude: CLLocationDegrees(latitude) ?? CLLocationDegrees("43.66195462781342")!,
+                                      longitude: CLLocationDegrees(longitude) ?? CLLocationDegrees("-79.39415108777314")!)
+    }
+    var title: String? {
+        return "\(fname ?? "null"): \(meal ?? "null")"
+    }
+    
+    
+    var fname: String!
+    var latitude: String!
+    var longitude: String!
+    var meal: String!
+    
+
+}
 class ViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDelegate {
 
     var mapView: MKMapView!
-    var users: [User] = []
-    
+//    var users: [User] = []
+    var meals: [Meal] = []
     override func viewDidLoad() {
         super.viewDidLoad()
         self.mapView = MKMapView(frame: self.view.bounds)
@@ -37,9 +55,9 @@ class ViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDe
         self.mapView.delegate = self
         self.mapView.register(MKPinAnnotationView.self, forAnnotationViewWithReuseIdentifier: "pin")
         
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(ViewController.mapTapAction(sender:)))
-        
-        self.mapView.addGestureRecognizer(tapGesture)
+//        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(ViewController.mapTapAction(sender:)))
+//
+//        self.mapView.addGestureRecognizer(tapGesture)
         
         
         
@@ -49,7 +67,7 @@ class ViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDe
     }
     
     func updateUsersFromServer() {
-        let url = URL(string:"https://iccit-media-cloud.glitch.me/users")!
+        let url = URL(string:"https://iccit-media-cloud.glitch.me/meals")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         URLSession.shared.dataTask(with: request) { (data, response, error) in
@@ -57,18 +75,24 @@ class ViewController: UIViewController, MKMapViewDelegate, UIGestureRecognizerDe
                 debugPrint(error?.localizedDescription ?? "no data")
                 return
             }
-            self.users = try! JSONDecoder().decode([User].self, from: data)
+            print(String(data:data, encoding: .utf8) ?? "")
+            guard let users = try? JSONDecoder().decode([Meal].self, from: data) else {
+                debugPrint("Could not decode any data from the server. Is it running?")
+                return
+            }
             DispatchQueue.main.async {
+
+                self.meals = users
                 self.addPinsToMap()
             }
         }.resume()
-    }
+    } 
 
     func addPinsToMap() {
-        self.users.forEach { (user) in
+        self.meals.forEach { (user) in
             self.mapView.addAnnotation(user)
         }
-        self.mapView.showAnnotations(self.users, animated: true)
+        self.mapView.showAnnotations(self.meals, animated: true)
     }
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
